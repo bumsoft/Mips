@@ -5,6 +5,7 @@
 	msg_d3: .asciiz "here3\n"
 
 	msg_newline5: .asciiz "\n\n\n\n\n"
+	msg_newline1: .asciiz "\n"
 	msg_divline: .asciiz "=============\n"
 	
 	#메뉴 문자열
@@ -21,7 +22,9 @@
 	msg_phone: .asciiz "PHONE: "
 	
 	#SHOW 문자열
+	msg_show: .asciiz "SHOW\n"
 	msg_empty: .asciiz "Address Book is Empty\n"
+	msg_id: .asciiz "ID: "
 
 
 	#HEAD노드
@@ -51,6 +54,10 @@ main:
 	sw $t4, 16($sp)
 	
 mainLoop: # while루프
+	la $a0, msg_newline5
+	li $v0, 4
+	syscall
+
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
@@ -59,7 +66,7 @@ mainLoop: # while루프
 
 	beq $t0, $zero, case_0
 	beq $t0, $t1, case_1
-	#beq $t0, $t2, case_2
+	beq $t0, $t2, case_2
 	#beq $t0, $t3, case_3
 	#beq $t0, $t4, case_4
 	
@@ -110,7 +117,7 @@ case_1: #ADD화면
 	
 	#새 노드 만들기(makeNode())
 	jal makeNode
-	move $a0, $v0 #a0 = 노드주소, 인자로 넘길거임
+	move $a0, $v0 #a0 = 만들어진 노드주소, 인자로 넘길거임
 	
 	jal append
 	
@@ -118,8 +125,87 @@ case_1: #ADD화면
 	sw $t0, 0($sp)
 	j mainLoop
 	
+case_2:
+	la $a0, msg_divline
+	li $v0, 4
+	syscall
 	
+	la $a0, msg_show
+	li $v0, 4
+	syscall
 	
+	la $a0, msg_divline
+	li $v0, 4
+	syscall
+	
+	jal showAll #call showAll()
+	
+	sw $zero, 0($sp)
+	j mainLoop
+	
+showAll:
+	la $t0, head
+	lw $t1, 0($t0)
+	beq $t1, $zero, bookIsEmpty #if(head == NULL)
+	j bookIsNotEmpty
+bookIsEmpty:
+	la $a0, msg_empty #"Address Book is Empty!"
+	li $v0, 4
+	syscall
+	
+	li $t0, 0 #screen = 0
+	sw $t0, 0($sp)
+	j mainLoop
+
+bookIsNotEmpty: # head != NUL
+	move $t2, $t1 #temp = head
+	
+showAllLoop:
+	beq $t2, $zero, showAllLoopExit #if(temp == NULL) 
+
+	lw $t3, 0($t2) #t3 = id(정수)
+	lw $t4, 4($t2) #t4 = name주소
+	lw $t5, 8($t2) #t5 = phone주소
+	lw $t6, 12($t2) #t6 = next주소
+
+	la $a0, msg_id #ID: 
+	li $v0, 4
+	syscall
+
+	move $a0, $t3
+	li $v0, 1 #print int
+	syscall
+
+	la $a0, msg_newline1 #\n
+	li $v0, 4
+	syscall
+
+	la $a0, msg_name #NAME: 
+	li $v0, 4
+	syscall
+	
+	move $a0, $t4
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_phone #PHONE: 
+	li $v0, 4
+	syscall
+	
+	move $a0, $t5
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_newline1 #\n
+	li $v0, 4
+	syscall
+	
+	move $t2, $t6 #temp = temp->next
+	
+	j showAllLoop
+	
+showAllLoopExit:
+	jr $ra #showAll 호출지점으로 복귀
 	
 	
 makeNode: #사용자입력 및 새 노드 만들기
