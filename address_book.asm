@@ -8,7 +8,7 @@
 	msg_newline1: .asciiz "\n"
 	msg_divline: .asciiz "=============\n"
 	
-	#¸Þ´º ¹®ÀÚ¿­
+	#ë©”ë‰´ ë¬¸ìžì—´
 	msg_menu0: .asciiz "    MENU\n"
 	msg_menu1: .asciiz "    1. ADD\n"
 	msg_menu2: .asciiz "    2. SHOW\n"
@@ -16,29 +16,29 @@
 	msg_menu4: .asciiz "    4. DELETE\n"
 	msg_menu5: .asciiz "CHOOSE MENU NUM: "
 	
-	#ADD ¹®ÀÚ¿­
+	#ADD ë¬¸ìžì—´
 	msg_add: .asciiz "ADD\n"
 	msg_name: .asciiz "NAME: "
 	msg_phone: .asciiz "PHONE: "
 	
-	#SHOW ¹®ÀÚ¿­
+	#SHOW ë¬¸ìžì—´
 	msg_show: .asciiz "SHOW\n"
 	msg_empty: .asciiz "Address Book is Empty\n"
 	msg_id: .asciiz "ID: "
 
 
-	#HEAD³ëµå
-	head: .word 0 #head³ëµå
-	num: .word 0  #³ëµå¾ÆÀÌµð
+	#HEADë…¸ë“œ
+	head: .word 0 #headë…¸ë“œ
+	num: .word 0  #ë…¸ë“œì•„ì´ë””
 	
 	#.align 2
 .text
 
 .globl main
-#½ÃÀÛ
+#ì‹œìž‘
 main:
-	addi $sp, $sp, -20 #5 * 4byte È®º¸
-	li $t0, 0 #screen = 0; ÃÊ±â È­¸é¹øÈ£
+	addi $sp, $sp, -20 #5 * 4byte í™•ë³´
+	li $t0, 0 #screen = 0; ì´ˆê¸° í™”ë©´ë²ˆí˜¸
 	sw $t0, 0($sp)
 	
 	li $t1, 1 #case1
@@ -53,7 +53,7 @@ main:
 	li $t4, 4 #case4
 	sw $t4, 16($sp)
 	
-mainLoop: # while·çÇÁ
+mainLoop: # whileë£¨í”„
 	la $a0, msg_newline5
 	li $v0, 4
 	syscall
@@ -71,8 +71,8 @@ mainLoop: # while·çÇÁ
 	#beq $t0, $t4, case_4
 	
 	
-case_0: #MENU È­¸é
-	#È­¸éÃâ·Â
+case_0: #MENU í™”ë©´
+	#í™”ë©´ì¶œë ¥
 	la $a0, msg_divline
 	li $v0, 4	  
 	syscall
@@ -94,17 +94,18 @@ case_0: #MENU È­¸é
 	la $a0, msg_divline
 	li $v0, 4	  
 	syscall
-	#ÀÔ·Â¹Þ±â
+	#ìž…ë ¥ë°›ê¸°
 	la $a0, msg_menu5
 	li $v0, 4	  
 	syscall
+	
 	la $v0, 5
 	syscall
-	sw $v0, 0($sp) #½ºÅÃ¿¡ ÀÔ·Â°ª ÀúÀå
+	sw $v0, 0($sp) #ìŠ¤íƒì— ìž…ë ¥ê°’ ì €ìž¥
 	j mainLoop
 	
-case_1: #ADDÈ­¸é
-	#È­¸éÃâ·Â
+case_1: #ADDí™”ë©´
+	#í™”ë©´ì¶œë ¥
 	la $a0, msg_divline
 	li $v0, 4	  
 	syscall
@@ -115,9 +116,9 @@ case_1: #ADDÈ­¸é
 	li $v0, 4	  
 	syscall
 	
-	#»õ ³ëµå ¸¸µé±â(makeNode())
+	#ìƒˆ ë…¸ë“œ ë§Œë“¤ê¸°(makeNode())
 	jal makeNode
-	move $a0, $v0 #a0 = ¸¸µé¾îÁø ³ëµåÁÖ¼Ò, ÀÎÀÚ·Î ³Ñ±æ°ÅÀÓ
+	move $a0, $v0 #a0 = ë§Œë“¤ì–´ì§„ ë…¸ë“œì£¼ì†Œ, ì¸ìžë¡œ ë„˜ê¸¸ê±°ìž„
 	
 	jal append
 	
@@ -163,10 +164,10 @@ bookIsNotEmpty: # head != NUL
 showAllLoop:
 	beq $t2, $zero, showAllLoopExit #if(temp == NULL) 
 
-	lw $t3, 0($t2) #t3 = id(Á¤¼ö)
-	lw $t4, 4($t2) #t4 = nameÁÖ¼Ò
-	lw $t5, 8($t2) #t5 = phoneÁÖ¼Ò
-	lw $t6, 12($t2) #t6 = nextÁÖ¼Ò
+	lw $t3, 0($t2) #t3 = id(ì •ìˆ˜)
+	lw $t4, 4($t2) #t4 = nameì£¼ì†Œ
+	lw $t5, 8($t2) #t5 = phoneì£¼ì†Œ
+	lw $t6, 12($t2) #t6 = nextì£¼ì†Œ
 
 	la $a0, msg_id #ID: 
 	li $v0, 4
@@ -205,23 +206,23 @@ showAllLoop:
 	j showAllLoop
 	
 showAllLoopExit:
-	jr $ra #showAll È£ÃâÁöÁ¡À¸·Î º¹±Í
+	jr $ra #showAll í˜¸ì¶œì§€ì ìœ¼ë¡œ ë³µê·€
 	
 	
-makeNode: #»ç¿ëÀÚÀÔ·Â ¹× »õ ³ëµå ¸¸µé±â
+makeNode: #ì‚¬ìš©ìžìž…ë ¥ ë° ìƒˆ ë…¸ë“œ ë§Œë“¤ê¸°
 
-	#³ëµå ÇÒ´ç¹Þ±â(16bytes)
+	#ë…¸ë“œ í• ë‹¹ë°›ê¸°(16bytes)
 	li $a0, 16
 	li $v0, 9
 	syscall
-	move $t0, $v0 #t0 = ³ëµåÁÖ¼Ò
+	move $t0, $v0 #t0 = ë…¸ë“œì£¼ì†Œ
 	
-	#ÀÌ¸§ ÇÒ´ç¹Þ±â(20bytes)
+	#ì´ë¦„ í• ë‹¹ë°›ê¸°(20bytes)
 	li $a0, 20
 	li $v0, 9
 	syscall
-	move $t1, $v0 #t1 = ÀÌ¸§ÁÖ¼Ò
-	#ÀÌ¸§ ÀÔ·Â¹Þ±â
+	move $t1, $v0 #t1 = ì´ë¦„ì£¼ì†Œ
+	#ì´ë¦„ ìž…ë ¥ë°›ê¸°
 	la $a0, msg_name
 	li $v0, 4	  
 	syscall
@@ -230,12 +231,12 @@ makeNode: #»ç¿ëÀÚÀÔ·Â ¹× »õ ³ëµå ¸¸µé±â
 	li $v0, 8
 	syscall
 	
-	#Æù ÇÒ´ç¹Þ±â(20bytes)
+	#í° í• ë‹¹ë°›ê¸°(20bytes)
 	li $a0, 20
 	li $v0, 9
 	syscall
-	move $t2, $v0 #t2 = ÆùÁÖ¼Ò
-	#Æù ÀÔ·Â¹Þ±â
+	move $t2, $v0 #t2 = í°ì£¼ì†Œ
+	#í° ìž…ë ¥ë°›ê¸°
 	la $a0, msg_phone
 	li $v0, 4	  
 	syscall
@@ -245,8 +246,8 @@ makeNode: #»ç¿ëÀÚÀÔ·Â ¹× »õ ³ëµå ¸¸µé±â
 	syscall
 	
 	#id
-	la $t3, num #t3 = num ÁÖ¼Ò
-	lw $t4, 0($t3) #t4 = num °ª
+	la $t3, num #t3 = num ì£¼ì†Œ
+	lw $t4, 0($t3) #t4 = num ê°’
 	
 	sw $t4, 0($t0) #node->id = id
 	sw $t1, 4($t0) #node->name = name
@@ -261,10 +262,10 @@ makeNode: #»ç¿ëÀÚÀÔ·Â ¹× »õ ³ëµå ¸¸µé±â
 	
 append:
 	addi $sp, $sp, -4
-	sw $ra, 0($sp) #¹ÝÈ¯ÁÖ¼Ò ÀúÀå
+	sw $ra, 0($sp) #ë°˜í™˜ì£¼ì†Œ ì €ìž¥
 
-	la $t0, head #t0 = ÇìµåÁÖ¼ÒÀÇ ÁÖ¼Ò = &head (Node* head)
-	lw $t1, 0($t0) #t1 = ÇìµåÁÖ¼Ò = head
+	la $t0, head #t0 = í—¤ë“œì£¼ì†Œì˜ ì£¼ì†Œ = &head (Node* head)
+	lw $t1, 0($t0) #t1 = í—¤ë“œì£¼ì†Œ = head
 	move $t2, $a0 #t2 = newNode
 	
 	beq $t1, $zero, headIsNull
@@ -275,19 +276,19 @@ append:
 	sw $t2 , 12($t3)
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
-	jr $ra #append È£ÃâÁöÁ¡À¸·Î º¹±Í
+	jr $ra #append í˜¸ì¶œì§€ì ìœ¼ë¡œ ë³µê·€
 	
 	
 headIsNull:
 	sw $t2, 0($t0) # head = newNode
 	addi $sp, $sp, 4
-	jr $ra #append È£ÃâÁöÁ¡À¸·Î º¹±Í
+	jr $ra #append í˜¸ì¶œì§€ì ìœ¼ë¡œ ë³µê·€
 	
-appendLoop: #temp -> next == NULL±îÁö ·çÇÁ
+appendLoop: #temp -> next == NULLê¹Œì§€ ë£¨í”„
 	lw $t4, 12($t3) # t4 = temp->next
 	beq $t4, $zero, returnLabel #if(temp->next == NULL) 
 	move $t3, $t4 #temp = temp->next
-	j appendLoop #¹Ýº¹
+	j appendLoop #ë°˜ë³µ
 
 returnLabel:
 	jr $ra #break
