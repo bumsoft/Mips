@@ -73,6 +73,7 @@ void showAll()
 	while (1)
 	{
 		if (temp == NULL) break;
+		printf("ID: %d", temp->id);
 		printf("NAME: %s     ", temp->name);
 		printf("PHONE: %s\n", temp->phone);
 		temp = temp->next;
