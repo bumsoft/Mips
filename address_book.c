@@ -107,6 +107,62 @@ void drawScreen1()
 	printf("===================\n");
 }
 
+int stringCompare(char* a, char* b)
+{
+	int index = 0;
+
+	while (1)
+	{
+		char ca = a[index];
+		char cb = b[index];
+
+		if (ca != cb) return 0;
+		
+		if (ca == '\0') return 1;
+
+		index++;
+	}
+}
+
+Node* find(char* target_name)
+{
+	Node* temp = head;
+	char* name;
+	int cnt = 0;
+	while (1)
+	{
+		if (temp == NULL) break;
+		name = temp->name;
+		int r = stringCompare(target_name, name);
+		if (r)
+		{
+			cnt++;
+			printf("ID: %d\n", temp->id);
+			printf("NAME: %s\n", temp->name);
+			printf("PHONE: %s\n", temp->phone);
+		}
+		temp = temp->next;
+	}
+	return cnt;
+}
+
+void search()
+{
+	printf("\n\n\n\n\n");
+	printf("=================\n");
+	printf("    SEARCH\n");
+	printf("=================\n");
+
+	char* name = malloc(20);
+	printf("NAME: ");
+	scanf("%d", name);
+	
+	int r = find(name);
+	if (r == 0) printf("Not Found\n");
+	return;
+}
+
+
 int main()
 {
 	int screen = 0;
@@ -135,12 +191,13 @@ int main()
 			screen = 0;
 			continue;
 		}
-		//else if (screen == 3) //search
-		//{
+		else if (screen == 3) //search
+		{
+			search();
 
-		//	screen = 0;
-		//	continue;
-		//}
+			screen = 0;
+			continue;
+		}
 		//else //delete
 		//{
 
