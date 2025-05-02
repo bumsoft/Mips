@@ -1,10 +1,13 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+﻿/*
+ * This code does not implement free because it is intended to be translated into MIPS.
+ */
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>
 
 /*
-	mips: 12bytes
+	mips: 16bytes
 */
 typedef struct node{
 	int id;
@@ -135,7 +138,7 @@ int find(char* target_name)
 		if (temp == NULL) break;
 		name = temp->name;
 		int r = stringCompare(target_name, name);
-		if (r) //여기부터!
+		if (r)
 		{
 			cnt++;
 			printf("ID: %d\n", temp->id);
@@ -160,7 +163,63 @@ void search()
 	printf("-------------\n");
 	int r = find(name);
 	if (r == 0) printf("Not Found\n");
-	free(name);
+	return;
+}
+
+void deletee()
+{
+	printf("\n\n\n\n\n");
+	printf("=================\n");
+	printf("    DELETE\n");
+	printf("=================\n");
+
+	if (head == NULL)
+	{
+		printf("Address Book is Empty!\n");
+		return;
+	}
+	printf("Enter the ID to delete: ");
+
+	int del_id;
+	scanf("%d", &del_id);
+
+	if (del_id >= num)
+	{
+		printf("Target ID doesn't exist.\n");
+		return;
+	}
+	Node* cur = head;
+	Node* prev = NULL;
+	Node* next = NULL;
+	while (1)
+	{
+		if (cur == NULL) break;
+
+		next = cur->next;
+
+		int t_id = cur->id;
+		if (t_id == del_id)
+		{
+			//head인 경우
+			if (cur == head)
+			{
+				head = next;
+				printf("Deleted.\n");
+				return;
+			}
+			else
+			{
+				prev->next = next;
+				printf("Deleted.\n");
+				return;
+			}
+		}
+
+		prev = cur;
+		cur = cur->next;
+	}
+
+	printf("Target ID doesn't exist.\n");
 	return;
 }
 
@@ -200,12 +259,18 @@ int main()
 			screen = 0;
 			continue;
 		}
-		//else //delete
-		//{
+		else if(screen == 4) //delete
+		{
+			deletee();
 
-		//	screen = 0;
-		//	continue;
-		//}
+			screen = 0;
+			continue;
+		}
+		else
+		{
+			screen = 0;
+			continue;
+		}
 	}
 
 }

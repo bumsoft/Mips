@@ -20,8 +20,12 @@
 	msg_empty: .asciiz "Address Book is Empty\n"
 	msg_id: .asciiz "ID: "
 
-	msg_search: .asciiz "SEARCH\N"
+	msg_search: .asciiz "SEARCH\n"
 	msg_not_found: .asciiz "Not Found\n"
+	
+	msg_delete: .asciiz "DELETE\n"
+	msg_delete_input: .asciiz "Enter the ID to delete: "
+	msg_id_not_exists: .asciiz "Target ID doesn't exist.\n"
 
 	head: .word 0 
 	num: .word 0 
@@ -77,12 +81,18 @@ screen3:
 	j mainLoop
 	
 screen4:
+	bne $s0, $s4, exit #if(screen != 4) -> exit
+	
+	jal delete
+	
+	move $s0, $zero # screen = 0
+	j mainLoop
 
 exit:
-    li   $v0, 10
-    syscall
+	li   $v0, 10
+	syscall
 
-
+#######################ADD#################################
 drawScreen0:
 	la $a0, msg_newline5 #\n\n\n\n\n
 	li $v0, 4
@@ -189,7 +199,7 @@ makeNode:
 	syscall
 	
 	move $a0, $t4 #input
-	li $a1 20
+	li $a1, 20
 	li $v0, 8
 	syscall
 	
@@ -220,7 +230,7 @@ append_while_exit:
 	sw $a0, 12($t2) # temp->next= newNode
 	jr $ra #return
 
-##########################################################################
+#########################SHOWALL#############################################
 showAll:
 	#draw
 	la $a0, msg_newline5 # \n\n\n\n\n
@@ -297,7 +307,7 @@ showAll_while:
 showAll_while_exit:
 	jr $ra #return
 
-#######################################################
+#######################SEARCH###########################
 search:
 	addi $sp, $sp, -8
 	sw $ra, 0($sp)
@@ -330,7 +340,7 @@ search:
 	syscall
 	
 	move $a0, $s0
-	move $a1, 20
+	li $a1, 20
 	li $v0, 8
 	syscall #input target_name
 	
@@ -364,7 +374,7 @@ find:
 	move $s0, $a0
 	
 	la $s1, head
-	lw $s2, 0($s1) $ # temp = head
+	lw $s2, 0($s1) # temp = head
 	
 	move $s3, $zero # count = 0
 	
@@ -376,12 +386,44 @@ find_while:
 	move $a1, $s4
 	jal stringCompare
 	#start here!
-	beq $v0, $zero, find_while_else
-	#cnt++
-	#printf....
+	beq $v0, $zero, find_while_next
+	addi $s3, $s3, 1 # count++
+	
+	la $a0, msg_id # ID:
+	li $v0, 4
+	syscall
+	
+	lw $a0, 0($s2)
+	li $v0, 1
+	syscall
+	
+	la $a0, msg_newline1 #\n
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_name # NAME:
+	li $v0, 4
+	syscall
+	
+	lw $a0, 4($s2)
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_phone # PHONE:
+	li $v0, 4
+	syscall
+	
+	lw $a0, 8($s2)
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_divline_ # ---------
+	li $v0, 4
+	syscall
 
-find_while_else:
-	lw $s2, 12($s2) #??
+find_while_next:
+	lw $s2, 12($s2) # temp = temp->next
+	j find_while
 	
 find_while_exit:
 	move $v0, $s3
@@ -412,8 +454,8 @@ stringCompare_while:
 	add $t0, $s0, $s2 # a + index
 	add $t1, $s1, $s2 # b + index
 	
-	lw $t2, 0($t0) # ca = *(a+index)
-	lw $t3, 0($t1) # cb = *(b+index)
+	lb $t2, 0($t0) # ca = *(a+index)
+	lb $t3, 0($t1) # cb = *(b+index)
 	
 	bne $t2, $t3, stringCompare_false #if(ca != cb) return 0
 	beq $t2, $zero, stringCompare_true #if(ca == '\0') return 1
@@ -423,18 +465,22 @@ stringCompare_while:
 	
 stringCompare_false:
 	move $v0, $zero
-	sw $ra, 0($sp)
-	sw $s0, 4($sp)
-	sw $s1, 8($sp)
-	sw $s2, 12($sp)
-	addi $sp, $sp, -16
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	lw $s2, 12($sp)
+	addi $sp, $sp, 16
 	jr $ra
 
 stringCompare_true:
 	li $v0, 1
-	sw $ra, 0($sp)
-	sw $s0, 4($sp)
-	sw $s1, 8($sp)
-	sw $s2, 12($sp)
-	addi $sp, $sp, -16
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	lw $s2, 12($sp)
+	addi $sp, $sp, 16
 	jr $ra
+
+################DELETE#####################################
+delete:
+	
