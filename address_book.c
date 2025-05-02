@@ -1,6 +1,7 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 /*
 	mips: 12bytes
@@ -124,7 +125,7 @@ int stringCompare(char* a, char* b)
 	}
 }
 
-Node* find(char* target_name)
+int find(char* target_name)
 {
 	Node* temp = head;
 	char* name;
@@ -134,7 +135,7 @@ Node* find(char* target_name)
 		if (temp == NULL) break;
 		name = temp->name;
 		int r = stringCompare(target_name, name);
-		if (r)
+		if (r) //여기부터!
 		{
 			cnt++;
 			printf("ID: %d\n", temp->id);
@@ -155,10 +156,11 @@ void search()
 
 	char* name = malloc(20);
 	printf("NAME: ");
-	scanf("%d", name);
-	
+	scanf("%s", name);
+	printf("-------------\n");
 	int r = find(name);
 	if (r == 0) printf("Not Found\n");
+	free(name);
 	return;
 }
 

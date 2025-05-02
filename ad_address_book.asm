@@ -20,6 +20,8 @@
 	msg_empty: .asciiz "Address Book is Empty\n"
 	msg_id: .asciiz "ID: "
 
+	msg_search: .asciiz "SEARCH\N"
+	msg_not_found: .asciiz "Not Found\n"
 
 	head: .word 0 
 	num: .word 0 
@@ -68,6 +70,11 @@ screen2: # show screen
 
 screen3:
 	bne $s0, $s3, screen4 #if(screen != 3) -> screen4
+	
+	jal search
+	
+	move $s0, $zero # screen = 0
+	j mainLoop
 	
 screen4:
 
@@ -212,7 +219,8 @@ append_while:
 append_while_exit:
 	sw $a0, 12($t2) # temp->next= newNode
 	jr $ra #return
-	
+
+##########################################################################
 showAll:
 	#draw
 	la $a0, msg_newline5 # \n\n\n\n\n
@@ -288,3 +296,145 @@ showAll_while:
 	j showAll_while
 showAll_while_exit:
 	jr $ra #return
+
+#######################################################
+search:
+	addi $sp, $sp, -8
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	
+	la $a0, msg_newline5 #\n\n\n\n\n
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_divline #==========
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_search #SEARCH
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_divline #===========
+	li $v0, 4
+	syscall
+	
+	li $a0, 20
+	li $v0, 9
+	syscall
+	
+	move $s0, $v0 # name = malloc(20)
+	
+	la $a0, msg_name # NAME: 
+	li $v0, 4
+	syscall
+	
+	move $a0, $s0
+	move $a1, 20
+	li $v0, 8
+	syscall #input target_name
+	
+	la $a0, msg_divline_ # ------------
+	li $v0, 4
+	syscall
+	
+	move $a0, $s0
+	jal find
+	
+	bne $v0, $zero, search_exit
+	la $a0, msg_not_found
+	li $v0, 4
+	syscall
+
+search_exit:
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	addi $sp, $sp, 8
+	jr $ra #return
+	
+find:
+	addi $sp, $sp, -24
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	sw $s3, 16($sp)
+	sw $s4, 20($sp)
+	
+	move $s0, $a0
+	
+	la $s1, head
+	lw $s2, 0($s1) $ # temp = head
+	
+	move $s3, $zero # count = 0
+	
+find_while:
+	beq $s2, $zero, find_while_exit #if(temp == NULL) break
+	lw $s4, 4($s2) # name = temp->name
+	
+	move $a0, $s0
+	move $a1, $s4
+	jal stringCompare
+	#start here!
+	beq $v0, $zero, find_while_else
+	#cnt++
+	#printf....
+
+find_while_else:
+	lw $s2, 12($s2) #??
+	
+find_while_exit:
+	move $v0, $s3
+	
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	lw $s2, 12($sp)
+	lw $s3, 16($sp)
+	lw $s4, 20($sp)
+	addi $sp, $sp, 24
+	
+	jr $ra
+
+stringCompare:
+	addi $sp, $sp, -16
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	
+	move $s0, $a0
+	move $s1, $a1	
+	move $s2, $zero # index = 0
+	
+stringCompare_while:
+	# change string's start address (mips doesn't support things like "lw $t1, $t0($a0)")
+	add $t0, $s0, $s2 # a + index
+	add $t1, $s1, $s2 # b + index
+	
+	lw $t2, 0($t0) # ca = *(a+index)
+	lw $t3, 0($t1) # cb = *(b+index)
+	
+	bne $t2, $t3, stringCompare_false #if(ca != cb) return 0
+	beq $t2, $zero, stringCompare_true #if(ca == '\0') return 1
+	
+	addi $s2, $s2, 1 #index++
+	j stringCompare_while
+	
+stringCompare_false:
+	move $v0, $zero
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	addi $sp, $sp, -16
+	jr $ra
+
+stringCompare_true:
+	li $v0, 1
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	addi $sp, $sp, -16
+	jr $ra
