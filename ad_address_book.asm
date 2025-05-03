@@ -25,7 +25,8 @@
 	
 	msg_delete: .asciiz "DELETE\n"
 	msg_delete_input: .asciiz "Enter the ID to delete: "
-	msg_id_not_exists: .asciiz "Target ID doesn't exist.\n"
+	msg_id_not_exist: .asciiz "Target ID doesn't exist.\n"
+	msg_delete_complete: .asciiz "Deleted.\n"
 
 	head: .word 0 
 	num: .word 0 
@@ -92,7 +93,7 @@ exit:
 	li   $v0, 10
 	syscall
 
-#######################ADD#################################
+#######################MENU#################################
 drawScreen0:
 	la $a0, msg_newline5 #\n\n\n\n\n
 	li $v0, 4
@@ -137,7 +138,8 @@ getIntegerInput:
 	syscall
 	jr $ra
 	
-	
+
+#######################ADD#################################
 drawScreen1:
 	la $a0, msg_newline5
 	li $v0, 4
@@ -483,4 +485,116 @@ stringCompare_true:
 
 ################DELETE#####################################
 delete:
+	addi $sp, $sp, -16
+	sw $s0, 0($sp)
+	sw $s1, 4($sp)
+	sw $s2, 8($sp)
+	sw $ra, 12($sp)
+
+	la $a0, msg_newline5 # \n\n\n\n\n
+	li $v0, 4
+	syscall
 	
+	la $a0, msg_divline # =============
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_delete # DELETE
+	li $v0, 4
+	syscall
+	
+	la $a0, msg_divline # =============
+	li $v0, 4
+	syscall
+	
+	la $s0, head
+	lw $s1, 0($s0) # s1 = head
+	
+	bne $s1, $zero, delete_next1 #if(head == NULL) return;
+	la $a0, msg_empty # "Address Book is Empty"
+	li $v0, 4
+	syscall
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra
+delete_next1: #s0: head's addr | s1: head's val | s2: del_id
+	la $a0, msg_delete_input # Enter the ID to delete: 
+	li $v0, 4
+	syscall
+	
+	jal getIntegerInput
+	move $s2, $v0 # s2 = del_id
+	
+	la $t0, num
+	lw $t0, 0($t0) #t0 = num
+	
+	slt $t1, $s2, $t0 # if(del_id < num) -> t1 = 1  | else -> t1 = 0
+	bne $t1, $zero, delete_next2 # if(del_id >= num)
+	
+	la $a0, msg_id_not_exist # Target ID doesn't exist
+	li $v0, 4
+	syscall
+	
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra #return
+delete_next2: # t0: cur | t1: prev | t2: next  || #s0: head's addr | s1: head's val | s2: del_id
+	move $t0, $s1 # cur = head
+	move $t1, $zero # prev = NULL
+	move $t2, $zero # next = NULL
+delete_while:
+	beq $t0, $zero, delete_while_exit # if(cur == NULL) break;
+	
+	lw $t2, 12($t0) # next = cur->next
+	lw $t3, 0($t0) # t3 = cur->id
+	
+	bne $t3, $s2, delete_while_next # if( tid == del_id)
+	
+	bne $t0, $s1, delete_not_head # if( cur == head)
+	sw $t2, 0($s0) # head = next
+	la $a0, msg_delete_complete
+	li $v0, 4
+	syscall
+	
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra #return
+	
+delete_not_head:
+	sw $t2, 12($t1) # prev->next = next
+	la $a0, msg_delete_complete
+	li $v0, 4
+	syscall
+	
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra #return
+	
+delete_while_next:
+	move $t1, $t0 # prev = cur
+	move $t0, $t2 # cur = next
+	j delete_while
+	
+delete_while_exit:
+	la $a0, msg_id_not_exist # Target ID doesn't exist
+	li $v0, 4
+	syscall
+	
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra #return

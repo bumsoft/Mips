@@ -216,7 +216,7 @@ void deletee()
 		}
 
 		prev = cur;
-		cur = cur->next;
+		cur = next;
 	}
 
 	printf("Target ID doesn't exist.\n");
